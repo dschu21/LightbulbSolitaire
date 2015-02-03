@@ -1,0 +1,1388 @@
+/*=================================================================
+Program name- Fall Assignment 3, Lights Out
+Author - Danyon Chu
+Date- December 21st,2013
+Programming Language, Version Number- Java v1.7
+=================================================================
+Problem Definition - Required to create a program which allows a user to play the game 'Lights Out'. The user is given a grid of randomly selected lights that are on, with a goal of turning off all the lights.
+When the user clicks a light, all adjacent lights will switch their on/off status as well.
+Input - user inputs their name, and which light they would like to toggle on/off
+Output - output the instructions, high scores, user name, game board, and number of moves taken to complete the game.
+Process - check which button the user clicks to run a series of conditions on which buttons need to have their lights toggled
+=================================================================
+List of Identifiers (local variables written in each individual method)
+---------------
+ Variables
+---------------
+(Image) myImage - holds the image that is set to the background of the game
+(AudioClip) myClip - holds the sound file that is played as background music
+(Panel) firstPanel - used to hold the components of the menu
+(Panel) startPanel1 - used the hold the array of buttons for normal mode
+(Panel) startPanel2 -used the hold the array of buttons for hard mode
+(Button[][]) square1 [][] - used to let the user toggle the lights in normal mode
+(Button[][]) square2 [][] - used to let the user toggle the lights in hard mode
+(byte[][]) array1 [][] - holds the current pattern of on/off lights for normal mode
+(byte[][]) mirrorArray1[][] - holds the original pattern of on/off lights for normal mode
+(byte[][]) array2 [][] - holds the current pattern of on/off lights for hard mode
+(byte[][]) mirrorArray2[][] - holds the original pattern of on/off lights for hard mode
+(int) check -a value used to run actions at the appropriate time in the action method
+(byte) level - checks what level the user has chosen to play
+(Button) sound - allows the user to turn on/off the sound
+(byte) mute - checks whether the music is playing or paused
+(Button) highScore - button used to direct the user to the high score page
+(Button) instructions - button used to direct the user to the instructions page
+(Button) startGame - button used to direct the user to begin playing
+(Button) closeGame - button used to allow the user to close the program
+(Timer) timer - used to change the pattern for the demo at specific intervals
+(Label) instruct1 - used to hold instructions for the user on how to play the game
+(Label) instruct2 - used to hold instructions for the user on how to play the game
+(Button) backInstructions - used to direct the user from the instructions page back to the main menu
+(Panel) demonstrationPanel - holds the array of buttons that are used as a demo to show the user how to play the game
+(Button[][]) demo[][] - array of buttons that are used as a demo to show the user how to play the game
+(byte[][]) demoArray[][] - holds the current pattern of on/off lights for demo mode
+(int) count - counts the number of moves the user has made
+(Panel) p - holds the components used to get the user's name
+(Panel) q - holds the components used to play the game such as the array of buttons the user will click
+(TextField) getName - used to allow the user to type in their name
+(String) name - holds the string value of the user's name
+(Label) numberMoves - used to output and update the number of moves the user has currently taken
+(Label) enterName - asks the user to enter their name
+(Label) welcome - welcomes the user to the game
+(Label) begin - tells the user that they can simply click to begin the game
+(Button) backGame - used to direct the user from the game page back to the main menu
+(Button) normal - allows the user to select the normal mode of the game
+(Button) hard - allows the user to select the hard mode of the game
+(boolean) foundKey - used to check which button the user has clicked in the array of buttons
+(boolean) winner - checks if the user has won the game
+(Label) scoreLabel1 - tells the user that the chart of scores represents the normal mode
+(Panel) scorePanel1 - holds the components used to display the high scores in normal mode for the user 
+(Label) scoreLabel2 - tells the user that the chart of scores represents the hard mode
+(Panel) scorePanel2 - holds the components used to display the high scores in hard mode for the user 
+(TextField) scores1[][] - holds top 10 high scores for normal mode
+(TextField) scores2[][] - holds top 10 high scores for hard mode
+(Label) high - tells the user they are on the high score page
+(Button) backHighScore - used to direct the user from the high score page back to the main menu
+(Label) highScorer - tells the user if they made a new high score on their game play
+(boolean) highScore1 - allows the program to check if there are any blank entries in the high scores for normal mode
+(boolean) highScore2 - allows the program to check if there are any blank entries in the high scores for hard mode
+(PrintWriter) output1 - allows the user to print to normal mode high scores file
+(PrintWriter) output2 - allows the user to print to hard mode high scores file
+(BufferedReader) input1 - allows the user to read the normal mode high scores file
+(BufferedReader) input2 - allows the user to read the hard mode high scores file
+(String[]) names1[]  - holds the top 10 high score usernames for normal mode
+(int[]) records1[]  - holds the top 10 high scores for normal mode
+(String[]) names2[] - holds the top 10 high score usernames for hard mode
+(int[]) records2[]  - holds the top 10 high scores for hard mode
+(Label) numberOfMovesToWin - tells the user how many moves they took to win the game
+(Label) winloss - tells the user if they won the game or reached the maximum amount of moves allowed
+(Button continueGame - allows the user to continue their current game if they please
+(Button) restartGame - allows the user to restart their current game from the beginning if they please
+(Button) restart - allows the user to restart their current game from the beginning if they please
+(Button) backEndScreen - used to direct the user from the end screen page back to the main menu
+(Button) closeEndScreen - allows the user to close the game from the end screen
+(int) width - the number of pixels lengthwise across the screen
+(int) height - the number of pixels vertically in the screen
+
+=================================================================
+ */ 
+
+import java.io.*; //allows access to library in the I/O library
+import java.net.URL; //allows access to java net.URL class
+import javax.swing.Timer; //allows access to java swing.Timer class
+import java.applet.Applet; //allows access to java applet class
+import java.applet.AudioClip; //allows access to java applet.AudioClip class
+import java.awt.*; //allows access to java awt class
+import java.awt.event.ActionEvent; //allows access to java awt.event.ActionEvent class 
+import java.awt.event.ActionListener; //allows access to java awt.event.ActionListener class 
+
+public class LightbulbSolitaire  extends Applet implements ActionListener {
+	Image myImage;
+	AudioClip myClip;
+	Panel firstPanel;
+	Panel startPanel1;
+	Panel startPanel2;
+	Button square1 [][] = new Button [5][5];
+	Button square2 [][] = new Button [6][6];
+	byte array1 [][] = new byte [5][5];
+	byte mirrorArray1[][] = new byte [5][5];
+	byte array2 [][] = new byte [6][6];
+	byte mirrorArray2[][] = new byte [6][6];
+	int check=0;
+	byte level=0;
+	Button sound;
+	byte mute = 0;
+
+	//menu
+	Button highScore;
+	Button instructions;
+	Button startGame;
+	Button closeGame;
+
+	//instructions
+	Timer timer = new Timer(1750, this);
+
+	Label instruct1;
+	Label instruct2;
+	Button backInstructions;
+	Panel demonstrationPanel;
+	Button demo[][]=new Button [5][5];
+	byte demoArray[][] = new byte [5][5];
+
+	//start
+	int count=0;
+	Panel p = new Panel();
+	Panel q = new Panel();
+	TextField getName;
+	String name="";
+	Label numberMoves;
+	Label enterName;
+	Label welcome;
+	Label begin;
+	Button restart;
+	Button backGame;
+	Button normal;
+	Button hard;
+	boolean foundKey = false;
+	boolean winner= true;
+
+	//highscores
+	Label scoreLabel1;
+	Panel scorePanel1;
+	Label scoreLabel2;
+	Panel scorePanel2;
+	TextField scores1[][] = new TextField[11][2];
+	TextField scores2[][] = new TextField[11][2];
+	Label high;
+	Button backHighScore;
+	Label highScorer;
+	boolean highScore1;     
+	boolean highScore2;
+
+	//score lists
+	PrintWriter output1;
+	PrintWriter output2;
+	BufferedReader input1;
+	BufferedReader input2;
+	String names1[] = new String [10];
+	int records1[] = new int [10];
+	String names2[] = new String [10];
+	int records2[] = new int [10];
+
+	//endScreen
+	Label numberOfMovesToWin;
+	Label winloss;
+	Button continueGame;
+	Button restartGame;
+	Button backEndScreen;
+	Button closeEndScreen;
+
+	int width = width();
+	int height = height();
+
+	/**init method:
+	 * This procedural method is called automatically and is used to create objects and organize the calling of other methods defined in the class
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void init(){
+		myImage = getImage(getCodeBase(), "woodboard.jpg");
+		try {
+			myClip = getAudioClip(new URL(getCodeBase(), "Channel.wav"));
+			myClip.loop();
+		}
+		catch (Exception e) {}
+
+		resize(width,height);
+		sound = new Button ("Sound On/Off");
+		sound.setBackground(Color.RED);
+		sound.setPreferredSize(new Dimension(75,75));   
+		sound.addActionListener(this);
+		firstPanel = new Panel ();
+		firstPanel.setLayout(new GridLayout(0,1));
+
+		//menu
+		startGame = new Button ("Start");
+		instructions = new Button ("Instructions");
+		highScore = new Button ("High Scores");
+		closeGame = new Button ("Close");
+		startGame.setPreferredSize(new Dimension(200, 100));
+
+		firstPanel.add(startGame);
+		firstPanel.add(instructions);
+		firstPanel.add(highScore);
+		firstPanel.add(closeGame);
+
+		startGame.addActionListener(this);
+		instructions.addActionListener(this);
+		highScore.addActionListener(this);
+		closeGame.addActionListener(this);
+
+		//start
+		normal = new Button("Normal");
+		normal.setPreferredSize(new Dimension(500, 500));
+		normal.addActionListener(this);
+		hard = new Button("Hard");
+		hard.setPreferredSize(new Dimension(500, 500));
+		hard.addActionListener(this);
+		restart = new Button ("Restart Game");
+		restart.addActionListener(this);
+		begin= new Label("Click to start.");
+		getName = new TextField(10);
+		welcome = new Label("");
+		numberMoves = new Label("Moves taken: " + count);
+		numberMoves.setFont(new Font("Arial",Font.BOLD,10));
+		backGame = new Button("Back to main menu");
+		backGame.addActionListener(this);
+
+		startPanel1 = new Panel();       
+		startPanel1.setLayout(new GridLayout(5,5));
+		for (byte i=0;i<array1.length;i++){
+			for (byte n=0; n <array1[i].length;n++){
+				square1[i][n]= new Button();
+				startPanel1.add(square1[i][n]);
+				square1[i][n].setPreferredSize(new Dimension(125, 125));
+				square1[i][n].addActionListener(this);
+			}
+		}
+
+		startPanel2 = new Panel();       
+		startPanel2.setLayout(new GridLayout(6,6));
+		for (byte i=0;i<array2.length;i++){
+			for (byte n=0; n <array2[i].length;n++){
+				square2[i][n]= new Button();
+				startPanel2.add(square2[i][n]);
+				square2[i][n].setPreferredSize(new Dimension(100, 100));
+				square2[i][n].addActionListener(this);
+			}
+		}
+
+		//instructions
+		instruct1 = new Label("Given a 5x5 grid of lights (randomly turned on/off), each light is controlled by a button which toggles the respective light and the surrounding non-diagonal lights." + "\n" + "The objective is to turn off ALL lights in 50 moves or less.");
+		instruct2= new Label("Turn on/off each light by using your cursor to click each light.");
+		backInstructions = new Button("Back");
+		backInstructions.addActionListener(this);
+		enterName = new Label("Please enter your name to begin: ");
+		enterName.setFont(new Font("Lucida",Font.PLAIN,75));
+		demonstrationPanel= new Panel();
+		demonstrationPanel.setLayout(new GridLayout(5,5));
+
+		for (byte i=0;i<array1.length;i++){
+			for (byte n=0; n <array1[i].length;n++){
+				demo[i][n]= new Button();
+				demo[i][n].setPreferredSize(new Dimension(100,100));
+				demo[i][n].addActionListener(this);
+				demo[i][n].setFocusable(false);
+				demo[i][n].setEnabled(false);
+				demonstrationPanel.add(demo[i][n]);
+			}
+		}
+
+		//highscores
+		scorePanel1 = new Panel();
+		scorePanel2 = new Panel();
+		backHighScore= new Button ("Back");
+		backHighScore.setPreferredSize(new Dimension(150,75));
+		backHighScore.addActionListener(this);
+
+		high = new Label ("High Scores");
+		high.setFont(new Font("Lucida",Font.PLAIN,275));        //200
+		highScorer = new Label("New High Score !");
+		highScorer.setFont(new Font("Lucida",Font.PLAIN,21));
+
+		scorePanel1.setLayout(new GridLayout(11,2));
+		scorePanel2.setLayout(new GridLayout(11,2));
+		scoreLabel1 = new Label("Normal Level");
+		scoreLabel1.setFont(new Font("Arial",Font.BOLD,35));    //30
+		scoreLabel2 = new Label("    Hard Level");
+		scoreLabel2.setFont(new Font("Arial",Font.BOLD,35));    //30
+
+		for (byte i=0;i<scores1.length;i++){ 
+			for (byte n=0; n <scores1[i].length;n++){
+				if(n%2!=0)
+					scores1[i][n] = new TextField(100);               //should this work? //75
+							else
+								scores1[i][n] = new TextField(5);
+				scores1[i][n].setText("-");
+				scores1[i][n].setEditable(false);
+				scorePanel1.add(scores1[i][n]);
+			}
+		}
+
+		for (byte i=0;i<scores2.length;i++){ 
+			for (byte n=0; n <scores2[i].length;n++){
+				if(n%2!=0)
+					scores2[i][n] = new TextField(100);               //should this work?   //75
+							else
+								scores2[i][n] = new TextField(5);
+				scores2[i][n].setText("-");
+				scores2[i][n].setEditable(false);
+				scorePanel2.add(scores2[i][n]);
+			}
+		}
+
+		scores1[0][0].setText("Name:");
+		scores1[0][1].setText("Score:");
+		scores2[0][0].setText("Name:");
+		scores2[0][1].setText("Score:");
+
+		try {
+			input1 = new BufferedReader (new FileReader ("E:/ICS3U1/programs/Final Project/High Scores/High Scores 1.txt"));
+			for(byte i = 0; i<records1.length;i++){
+				names1[i] = input1.readLine();
+				records1[i] = Integer.parseInt(input1.readLine());
+			}
+			input1.close();
+		} catch (NumberFormatException | IOException e) {}
+
+		try {
+			input2 = new BufferedReader (new FileReader ("E:/ICS3U1/programs/Final Project/High Scores/High Scores 2.txt"));
+			for(byte i = 0; i<records2.length;i++){
+				names2[i] = input2.readLine();
+				records2[i] = Integer.parseInt(input2.readLine());
+			}
+			input2.close();
+		} catch (NumberFormatException | IOException e) {}
+
+		//endScreen
+		numberOfMovesToWin= new Label("");
+		winloss = new Label("");
+		continueGame = new Button ("Continue Game");
+		continueGame.addActionListener(this);
+		restartGame = new Button ("Restart same game");
+		restartGame.addActionListener(this);
+		backEndScreen = new Button ("Back to main menu");
+		backEndScreen.addActionListener(this);
+		closeEndScreen = new Button ("Close Game");
+		closeEndScreen.addActionListener(this);
+
+		menu();
+	}
+
+	/**menu method:
+	 * This procedural method is used to add the menu buttons for the user to begin the program
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void menu(){
+		setBackground(Color.ORANGE);
+		add(sound);
+		add(firstPanel, BorderLayout.CENTER);
+	}
+
+	/**clearMenu method:
+	 * This procedural method is used to remove the menu buttons after the user decides what to do
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearMenu(){
+		remove(firstPanel);
+	}
+
+	/**getUserName method:
+	 * This procedural method is used to add components to get the user's name
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void getUserName(){
+		p.setLayout(new BorderLayout());
+		p.add(enterName, BorderLayout.NORTH);
+		p.add(getName, BorderLayout.SOUTH);
+		add(p);
+	}
+
+	/**clearUserName method:
+	 * This procedural method is used to remove the components used to get the user's name
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearUserName(){
+		remove (p);
+	}
+
+	/**clearStart method:
+	 * This procedural method is used to remove the game board
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearStart(){
+		remove (q);
+		remove (restart);
+		q.remove (startPanel1);
+		q.remove (startPanel2);
+		validate();
+	}
+
+	/**instructions method:
+	 * This procedural method is used to add all components used to teach the user how to play the game
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void instructions(){
+		add(instruct1);
+		add(instruct2);
+		add(demonstrationPanel);
+		add(backInstructions);
+		timer.start();
+		check=2;
+	}
+
+	/**clearInstructions method:
+	 * This procedural method is used to remove all components used to teach the user how to play the game
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearInstructions(){
+		remove(instruct1);
+		remove(instruct2);
+		remove (backInstructions);
+		remove(demonstrationPanel);
+	}
+
+	/**highScore method:
+	 * This procedural method is used to add all components used to display the all-time high scores
+	 * 
+	 * Local Variables
+	 * index1 - stores the position of the first non-zero entry if there are blank entries for high scores on normal mode (int)
+	 * index2 - stores the position of the first non-zero entry if there are blank entries for high scores on hard mode (int)
+	 * textfieldCheck - keeps track of what high score location the system needs to output high scores at (int)
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void highScore() {
+		int textfieldCheck;
+		int index1 = 0;
+		int index2 = 0; 
+
+		add(high);
+		add(backHighScore);
+		add(scoreLabel1);
+		add(scorePanel1);
+		add(scoreLabel2);
+		add(scorePanel2);
+
+		highScore1=true;
+		highScore2=true;
+
+		for(byte i = 0; i<records1.length;i++){
+			if (records1[i]==0){
+
+				highScore1=false;
+				i=10;
+			}
+		}
+		for(byte i = 0; i<records2.length;i++){
+			if (records2[i]==0){
+
+				highScore2=false;
+				i=10;
+			}
+		}
+
+		if (highScore1==false){
+			for(byte i = 0; i<records1.length;i++){
+				if (records1[i]!=0){
+					index1 = i;
+					i=10;
+				}
+			}
+		}
+		if (highScore2==false){
+			for(byte i = 0; i<records2.length;i++){
+				if (records2[i]!=0){
+					index2 = i;
+					i=10;
+				}
+			}
+		}
+
+		textfieldCheck=1;
+		if (highScore1==true){
+			for(byte i = 0; i<records1.length;i++){
+				scores1[i+1][0].setText(i+1+".  "+names1[i]);
+				scores1[i+1][1].setText(String.valueOf(records1[i]));
+			}
+		}
+		else{
+			/*for(int i = index1; i<records1.length;i++){
+				scores1[textfieldCheck][0].setText(textfieldCheck+".  "+names1[i]);
+				scores1[textfieldCheck][1].setText(String.valueOf(records1[i]));
+				textfieldCheck++;
+			}*/
+			for(int i = 0; i<index1;i++){
+				scores1[textfieldCheck][0].setText(names1[i]);
+				scores1[textfieldCheck][1].setText(String.valueOf(records1[i]));
+				textfieldCheck++;
+			}
+		}
+
+		textfieldCheck=1;
+
+		if (highScore2==true){
+			for(byte i = 0; i<records2.length;i++){
+				scores2[i+1][0].setText(i+1+".  "+names2[i]);
+				scores2[i+1][1].setText(String.valueOf(records2[i]));
+			}
+		}
+		else{
+			for(int i = index2; i<records2.length;i++){
+				scores2[textfieldCheck][0].setText(textfieldCheck+".  "+names2[i]);
+				scores2[textfieldCheck][1].setText(String.valueOf(records2[i]));
+				textfieldCheck++;
+			}
+			for(int i = 0; i<index2;i++){
+				scores2[textfieldCheck][0].setText(names2[i]);
+				scores2[textfieldCheck][1].setText(String.valueOf(records2[i]));
+				textfieldCheck++;
+			}
+		}
+	}
+
+	/**clearhighScore method:
+	 * This procedural method is used to remove all components used to display the all-time high scores
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearHighScore(){
+		remove(high);
+		remove (backHighScore);
+		remove(scoreLabel1);
+		remove(scoreLabel2);
+		remove(scorePanel1);
+		remove(scorePanel2);
+	}
+
+	/**endScreen method:
+	 * This procedural method is used to produce the screen with all components when the user wins/losses the game
+	 * 
+	 * @throws IOException
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void endScreen() throws IOException {
+		highScore1=true;
+		highScore2=true;
+
+		if(winner==true){
+			winloss.setText("Congratulations ! You win ! ");
+			winloss.setFont(new Font("Lucida",Font.PLAIN,115));
+
+			if (count<=50)
+				numberOfMovesToWin.setText("It took " + count + " moves to win.");
+			else
+				numberOfMovesToWin.setText("It took " + (count-1) + " moves to win.");
+
+			if(level==1){
+				if (records1[0]==0){
+					for(byte i = 1; i<records1.length;i++){
+						records1[i-1]=records1[i];
+						names1[i-1]= names1[i];         
+					}
+					highScore1=false;
+					records1[9]=count;
+					names1[9]= name;
+					add(highScorer);
+				}
+				else{
+					if(count<records1[9]){
+						records1[9]=count;
+						names1[9]= name;
+						add(highScorer);
+					}
+				}
+			}
+
+			if(level==2){
+				if (records2[0]==0){
+					for(byte i = 1; i<records2.length;i++){
+						records2[i-1]=records2[i];
+						names2[i-1]= names2[i];         
+					}
+					highScore2=false;
+					records2[9]=count;
+					names2[9]= name;
+					add(highScorer);
+				}
+
+				else{
+					if(count<records2[9]){
+						records2[9]=count;
+						names2[9]= name;
+						add(highScorer);
+					}
+				}
+			}
+
+			add(winloss);
+			add(backEndScreen);
+			add(closeEndScreen);
+			add(numberOfMovesToWin);
+			setHighScore();
+		}
+		else{
+			winloss.setText("You have reached the maximum limit of moves, Please choose an option");
+			winloss.setFont(new Font("Lucida",Font.PLAIN,25));
+			add(winloss);
+			add(continueGame);
+			add(restartGame);
+			add(backEndScreen);
+			add(closeEndScreen);
+		}
+	}
+
+	/**clearEndScreen method:
+	 * This procedural method is used to remove the screen with all components when the user indicates what they want to do after the game
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void clearEndScreen(){
+		remove(winloss);
+		remove(continueGame);
+		remove(restartGame);
+		remove(backEndScreen);
+		remove(closeEndScreen);
+		remove(numberOfMovesToWin);
+		remove(highScorer);
+	}
+
+	/**setHighScore method:
+	 * This procedural method is read and write back to the high score txt files
+	 * 
+	 * @throws IOException
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void setHighScore() throws IOException { 
+		if(level==1){
+			output1 = new PrintWriter (new FileWriter ("E:/ICS3U1/programs/Final Project/High Scores/High Scores 1.txt"));
+			sort();
+
+			for(byte i = 0; i<records1.length;i++){
+				output1.println(names1[i]);             
+				output1.println (records1[i]);
+			}
+			output1.close();
+		}
+
+		if(level==2){
+			output2 = new PrintWriter (new FileWriter ("E:/ICS3U1/programs/Final Project/High Scores/High Scores 2.txt"));
+			sort();
+
+			for(byte i = 0; i<records2.length;i++){
+				output2.println(names2[i]);             
+				output2.println (records2[i]);
+			}
+			output2.close();
+		}
+	}       
+
+	/**sort method:
+	 * This procedural method is used to check whether there are any numbers less then the number at the current index
+	 * 
+	 * Local variable
+	 * minIndex - holds the index of the smallest number that hasn't been sorted yet (int)
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void sort(){
+		int minIndex;
+		if (level==1){
+			for( int index = 0; index < records1.length - 1; index++ ){
+				minIndex = min( index );
+				swap( minIndex, index );
+			}
+		}
+		else{
+			for( int index = 0; index < records2.length - 1; index++ ){
+				minIndex = min( index );
+				swap( minIndex, index );
+			}
+		}
+	}
+
+	/**min method:
+	 * This functional method is used to compare the number at the current index to all the other numbers in the index to see if any are smaller
+	 * 
+	 * Local variable
+	 * minIndex - holds the index of the smallest number that hasn't been sorted yet (int)
+	 * 
+	 * @param <int start>
+	 * start - holds the index of the number we are comparing to the others (int)
+	 * 
+	 * @return minIndex
+	 * minIndex - the index of the lowest number that has yet to be sorted (int)
+	 */
+
+	public int min(int start){
+		int minIndex= start;
+		if(level==1){
+			for( int index = start + 1; index < records1.length; index++ ){
+				if( records1[index] < records1[minIndex] ){
+					minIndex = index;
+				}
+			}
+		}
+
+		if(level==2){
+			for( int index = start + 1; index < records2.length; index++ ){
+				if( records2[index] < records2[minIndex] ){
+					minIndex = index;
+				}
+			}
+		}
+		return minIndex;
+	}
+
+	/**swap method:
+	 * This procedural method is used to swap numbers at the current index with the number at the index with the lowest number left unsorted
+	 * 
+	 * Local variable
+	 * tempName - is the name who holds the lowest score left unsorted  (String)
+	 * 
+	 * @param <int index1, int index2>
+	 * index1 - is the index of the lowest number left unsorted (int)
+	 * index2 - is the current index to be switched away (int)
+	 * 
+	 * @return void
+	 */
+
+	public void swap(int index1, int index2){
+		String tempName;
+		if (level==1){
+			int temp = records1[index1];
+			records1[index1] = records1[index2];
+			tempName=names1[index1];
+			names1[index1]=names1[index2];
+			names1[index2]=tempName;
+			records1[index2] = temp;
+		}
+
+		if (level==2){
+			int temp = records2[index1];
+			records2[index1] = records2[index2];
+			tempName=names2[index1];
+			names2[index1]=names2[index2];
+			names2[index2]=tempName;
+			records2[index2] = temp;
+		}
+	}
+
+	/**continuing method:
+	 * This procedural method is used to let the user continue the game even after the maximum number of moves allowed is reacher
+	 * 
+	 * @param <inull>
+	 * @return void
+	 */
+
+	public void continuing(){
+		count=51;
+		if (level==1)
+			q.add(startPanel1);
+		else
+			q.add(startPanel2);
+		add(backGame);
+		add(q);
+		add(restart);
+	}
+
+	/**restarting method:
+	 * This procedural method is used to allow the user to restart the previous game from scratch
+	 * 
+	 * @param <null>
+	 * @return void
+	 */
+
+	public void restarting(){
+		count=0;
+		numberMoves.setText("Moves taken: " + count);
+
+		if (level==1){
+			for (byte i=0;i<array1.length;i++){    
+				for (byte n=0; n <array1[i].length;n++){
+					array1[i][n] = mirrorArray1[i][n];
+					if (array1[i][n]==1)
+						square1[i][n].setBackground (Color.YELLOW);
+					else
+						square1[i][n].setBackground (Color.BLACK);
+				}
+			}
+			q.add(startPanel1, BorderLayout.SOUTH);
+		}
+		else{
+			for (byte i=0;i<array2.length;i++){    
+				for (byte n=0; n<array2[i].length;n++){
+					array2[i][n] = mirrorArray2[i][n];
+					if (array2[i][n]==1)
+						square2[i][n].setBackground (Color.YELLOW);
+					else
+						square2[i][n].setBackground (Color.BLACK);
+				}       
+			}
+			q.add(startPanel2, BorderLayout.SOUTH);
+
+		}
+		add(backGame);
+		add(q);
+		validate();
+	}
+
+	/**height method:
+	 * This functional method is called by methods that require the value of the screen's height.
+	 * 
+	 * List of Local Variables
+	 * height - is the total number of pixels in the computer screen's vertical plane (int)
+	 * env - used to get local graphics (Graphics Environment Object)
+	 * device - used to get the display mode of the screen (Graphics Device Object)
+	 * 
+	 * @param  <null>
+	 * @return height
+	 * height - is the height of the device in pixels (int)
+	 */
+
+	public int height() {
+		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] devices = env.getScreenDevices();
+		int height = 0;
+		for (GraphicsDevice device : devices) 
+			height= device.getDisplayMode().getHeight();
+
+		return height;
+	}
+
+	/**width method:
+	 *This functional method is called by methods that require the value of the screen's width.
+	 * 
+	 * List of Local Variables
+	 * width - is the total number of pixels in the computer screen's horizontal plane (int)
+	 * env - used to get local graphics (Graphics Environment Object)
+	 * device - used to get the display mode of the screen (Graphics Device Object)
+	 * 
+	 * @param <null>
+	 * @return width
+	 * width - is the width of the device in pixels (int)
+	 */
+
+	public int width() {
+		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] devices = env.getScreenDevices();
+		int width = 0;
+		for (GraphicsDevice device : devices) 
+			width= device.getDisplayMode().getWidth();
+
+		return width;
+	}
+
+	/**generate1 method:
+	 * This functional method is generate random integer values from 0-4 for normal mode
+	 * 
+	 * @param <null>
+	 * @return num
+	 * num - random number used to choose a random row and column (byte)
+	 */
+
+	public byte generate1(){
+		byte num;
+		num=(byte) Math.round(Math.random()*4);
+		return num;
+	}
+
+	/**generate2 method:
+	 * This functional method is generate random integer values from 0-5 for hard mode
+	 * 
+	 * @param <null>
+	 * @return num
+	 * num - random number used to choose a random row and column (byte)
+	 */
+
+	public byte generate2(){
+		byte num;
+		num=(byte) Math.round(Math.random()*5);
+		return num;
+	}
+
+	/**conditions1 method:
+	 * This procedural method is toggle the light switch clicked as well as all adjacent lights for normal mode
+	 * 
+	 * @param <byte row, byte column>
+	 * row - is the randomly generated number between 0-4 to choose a random row (byte)
+	 * column - is the randomly generated number between 0-4 to choose a random column (byte)
+	 * @return void
+	 */
+
+	public void conditions1(byte row, byte column){
+		if(array1[row][column]==1)
+			array1[row][column]=0;
+		else
+			array1[row][column]=1;
+
+		if(row!=0)
+			if (array1[row-1][column]==1)
+				array1[row-1][column]=0;
+			else
+				array1[row-1][column]=1;
+
+		if(row!=4)
+			if (array1[row+1][column]==1)
+				array1[row+1][column]=0;
+			else
+				array1[row+1][column]=1;
+
+		if(column!=0)
+			if (array1[row][column-1]==1)
+				array1[row][column-1]=0;
+			else
+				array1[row][column-1]=1;
+
+		if(column!=4)
+			if (array1[row][column+1]==1)
+				array1[row][column+1]=0;
+			else
+				array1[row][column+1]=1;
+
+		for (byte i=0;i<array1.length;i++){      
+			for (byte n=0; n <array1[i].length;n++){
+				if (array1[i][n]==1)
+					square1[i][n].setBackground (Color.YELLOW);
+				else
+					square1[i][n].setBackground (Color.BLACK);
+			}
+		}
+	}
+
+	/**conditions2 method:
+	 * This procedural method is toggle the light switch clicked as well as all adjacent lights for hard mode
+	 * 
+	 * @param <byte row, byte column>
+	 * row - is the randomly generated number between 0-5 to choose a random row (byte)
+	 * column - is the randomly generated number between 0-5 to choose a random column (byte)
+	 * @return void
+	 */ 
+
+	public void conditions2(byte row, byte column){
+		if(array2[row][column]==1)
+			array2[row][column]=0;
+		else
+			array2[row][column]=1;
+
+		if(row!=0)
+			if (array2[row-1][column]==1)
+				array2[row-1][column]=0;
+			else
+				array2[row-1][column]=1;
+
+		if(row!=5)
+			if (array2[row+1][column]==1)
+				array2[row+1][column]=0;
+			else
+				array2[row+1][column]=1;
+
+		if(column!=0)
+			if (array2[row][column-1]==1)
+				array2[row][column-1]=0;
+			else
+				array2[row][column-1]=1;
+
+		if(column!=5)
+			if (array2[row][column+1]==1)
+				array2[row][column+1]=0;
+			else
+				array2[row][column+1]=1;
+
+		for (byte i=0;i<array2.length;i++){      
+			for (byte n=0; n <array2[i].length;n++){
+				if (array2[i][n]==1)
+					square2[i][n].setBackground (Color.YELLOW);
+				else
+					square2[i][n].setBackground (Color.BLACK);
+			}
+		}
+	}
+
+	/**actionPerformed method:
+	 * This procedural method is used to perform actions every time a button is clicked
+	 * 
+	 * Local variables
+	 * row - used to hold the index for a randomly selected row
+	 * column - used to hold the index for a randomly selected column
+	 * 
+	 * @param <ActionEvent evt>
+	 * evt - object used to check what events are happening in the applet. Ex. clicking a button
+	 * @return void
+	 */
+
+	public void actionPerformed(ActionEvent evt) {
+		byte row,column;
+		if (evt.getSource()==startGame){
+			name="";
+			clearMenu();
+			add (normal);
+			add(hard);
+			add(backGame);
+			validate();
+			check=1;
+		}
+
+		if (evt.getSource()==normal){
+			remove (normal);
+			remove(hard);
+			getUserName();
+			validate();
+			level=1;
+
+			for (byte i=0;i<21;i++){
+				row=generate1();
+				column=generate1();
+				conditions1(row,column);
+			}
+
+			for (byte i=0;i<array1.length;i++){      
+				for (byte n=0; n <array1[i].length;n++){
+					mirrorArray1[i][n] = array1[i][n];
+					if (array1[i][n]==1)
+						square1[i][n].setBackground (Color.YELLOW);
+					else
+						square1[i][n].setBackground (Color.BLACK);
+
+				}
+			}
+
+			q.setLayout(new BorderLayout());
+			q.add (welcome, BorderLayout.NORTH);
+			q.add (begin, BorderLayout.CENTER);
+			q.add(startPanel1, BorderLayout.SOUTH);
+			q.add(numberMoves, BorderLayout.WEST);
+		}
+
+		if (evt.getSource()==hard){
+			remove (normal);
+			remove(hard);
+			getUserName();
+			validate();
+			level=2;
+
+			for (byte i=0;i<12;i++){
+				row=generate2();
+				column=generate2();
+				conditions2(row,column);
+			}
+
+			for (byte i=0;i<array2.length;i++){      
+				for (byte n=0; n <array2[i].length;n++){
+					mirrorArray2[i][n] = array2[i][n];
+					if (array2[i][n]==1)
+						square2[i][n].setBackground (Color.YELLOW);
+					else
+						square2[i][n].setBackground (Color.BLACK);
+				}
+			}
+
+			q.setLayout(new BorderLayout());
+			q.add (welcome, BorderLayout.NORTH);
+			q.add (begin, BorderLayout.CENTER);
+			q.add(startPanel2, BorderLayout.SOUTH);
+			q.add(numberMoves, BorderLayout.WEST);
+		}
+
+		if (evt.getSource()==backGame){
+			count=0;
+			name="";
+			getName.setText("");
+			numberMoves.setText("Moves taken: " + count);
+			remove (normal);
+			remove(hard); 
+			clearStart();
+			clearUserName();
+			remove(backGame);
+			menu();
+			validate();
+
+			for (byte i=0;i<array1.length;i++){      
+				for (byte n=0; n <array1[i].length;n++){
+					array1[i][n]= 0;
+					square1[i][n].setBackground (Color.BLACK);
+				}
+			}
+
+			for (byte i=0;i<array2.length;i++){      
+				for (byte n=0; n <array2[i].length;n++){
+					array2[i][n]= 0;
+					square2[i][n].setBackground (Color.BLACK);
+				}
+			}
+		}
+
+		if (evt.getSource()==instructions){
+			clearMenu();
+			instructions();
+			validate();
+			for (byte i=0;i<array1.length;i++){     
+				for (byte n=0; n <array1[i].length;n++){
+					array1[i][n]=(byte) Math.round(Math.random());
+					if (array1[i][n]==1)
+						demo[i][n].setBackground (Color.YELLOW);
+					else
+						demo[i][n].setBackground (Color.BLACK);
+				}
+			}
+
+			byte num1=generate1();
+			byte num2=generate1();
+			conditions1(num1,num2);
+			check=2;
+		}
+
+		if (evt.getSource()==backInstructions){
+			clearInstructions();
+			menu();
+			validate();
+			check=0;
+		}
+
+		if (evt.getSource()==restart){
+			clearStart();
+			restarting();
+			add(restart);
+			validate();
+		}
+
+		if (evt.getSource()==highScore){
+			clearMenu();
+			highScore();
+			validate();
+		}
+
+		if (evt.getSource()==backHighScore){
+			clearHighScore();
+			menu();
+			validate();
+		}
+
+		if (evt.getSource()==sound){
+			if(mute==0){
+				myClip.stop();
+				mute=1;
+			}
+			else{
+				myClip.loop();
+				mute=0;
+			}
+		}
+
+		if (evt.getSource()==closeGame){
+			System.exit(0);
+		}
+
+		if (evt.getSource()==restartGame){
+			clearEndScreen();
+			restarting();
+			validate();
+		}
+
+		if (evt.getSource()==continueGame){
+			clearEndScreen();
+			continuing();
+			validate();
+		}
+
+		if (evt.getSource()==backEndScreen){
+			count=0;
+			getName.setText("");
+			numberMoves.setText("Moves taken: " + count);
+			clearStart();
+			clearUserName();
+			clearEndScreen();
+			menu();
+			validate();
+			check=0;
+
+			for (byte i=0;i<array1.length;i++){      
+				for (byte n=0; n <array1[i].length;n++){
+					array1[i][n]= 0;
+					square1[i][n].setBackground (Color.BLACK);
+				}
+			}
+		}
+
+		if (evt.getSource()==closeEndScreen){
+			System.exit(0);
+		}
+
+		for (byte i = 0; i<square1.length&& !foundKey;i++){
+			for (byte n=0;n<square1[i].length&& !foundKey;n++){
+				if (evt.getSource() == square1[i][n]){
+					if (count==0){
+						q.remove (begin);
+						validate();
+					}
+					foundKey=true;
+					count++;
+					if (count<=50)
+						numberMoves.setText("Moves taken: " + count);
+					else
+						numberMoves.setText("Moves taken: " + (count-1));
+					conditions1(i,n);
+
+				}
+			}
+		}
+
+		for (byte i = 0; i<square2.length&& !foundKey;i++){
+			for (byte n=0;n<square2[i].length&& !foundKey;n++){
+				if (evt.getSource() == square2[i][n]){
+					if (count==0){
+						q.remove (begin);
+						validate();
+					}
+					foundKey=true;
+					count++;
+					if (count<=50)
+						numberMoves.setText("Moves taken: " + count);
+					else
+						numberMoves.setText("Moves taken: " + (count-1));
+					conditions2(i,n);
+
+				}
+			}
+		}
+
+		winner=true;
+
+		if(level==1){
+			for (byte i=0;i<array1.length;i++){      
+				for (byte n=0;n<array1[i].length;n++){
+
+					if(array1[i][n]==0)
+						winner=true;            
+					else{
+						winner=false;           
+						i=n=5;
+						break;
+					}
+				}
+			}
+		}
+
+		if(level==2){
+			for (byte i=0;i<array2.length;i++){      
+				for (byte n=0;n<array2[i].length;n++){
+
+					if(array2[i][n]==0)
+						winner=true;            
+					else{
+						winner=false;           
+						i=n=6;
+						break;
+					}
+
+				}
+			}
+		}
+
+		if (count>0){
+			if (winner==true||count==50){
+				clearStart();
+				remove(backGame);
+				try {
+					endScreen();
+				} catch (IOException e) {}
+				validate();
+			}
+		}
+
+		if (check==2){
+			row=generate1();
+			column=generate1();
+			conditions1(row,column);   
+
+			for (byte i=0;i<array1.length;i++){      
+				for (byte n=0; n <array1[i].length;n++){
+					if (array1[i][n]==1)
+						demo[i][n].setBackground (Color.YELLOW);
+					else
+						demo[i][n].setBackground (Color.BLACK);
+				}
+			}
+
+			if (evt.getSource()==backInstructions){
+				check=0;
+				timer.stop();
+			}
+		}
+		foundKey=false;
+	}
+
+	/**action method:
+	 * This procedural method is used to perform functions every time an action is done
+	 * 
+	 * @param <Event e, Object o>
+	 * e - used to react to user actions on controls (Event)
+	 * o - used to react to user actions on controls (Object)
+	 * 
+	 * @return void
+	 */
+
+	public boolean action(Event e,Object o){
+
+		if (check==1){
+			while(true){
+				try{
+					if(getName.getText().length()>15)
+						return true;
+					else{
+						name = getName.getText();       
+						clearUserName();
+						welcome.setText("Welcome "+ name+ " !");
+						welcome.setFont(new Font("Lucida",Font.PLAIN,50));
+						add(q);
+						add(restart);
+						validate();
+						break;
+					}
+
+				}catch(Exception ee){
+					return true;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**paint method:
+	 *This procedural method is called to paint the background screen
+	 * 
+	 * @param  <Graphics g>
+	 * g -object used to draw on the applet (Graphics)
+	 * 
+	 * @return void
+	 */
+
+	public void paint(Graphics g){
+		g.drawImage(myImage, 0, 0, getWidth(), getHeight(), this);
+	}
+}
+
